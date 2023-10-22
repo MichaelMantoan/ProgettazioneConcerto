@@ -72,7 +72,7 @@ class Concerto
     public static function Create($concerto)
     {
         $db = new DbManager("config.txt");
-        $pdo = $db->Connect("Organizzazione_Concerto");
+        $pdo = $db->Connect("organizzazione_concerti");
         $stm = $pdo->prepare("INSERT INTO concerti (codice, titolo, descrizione, data_concerto) VALUES (:codice, :titolo, :descrizione, :data_concerto)");
 
         $codice = $concerto['codice'];
@@ -96,7 +96,7 @@ class Concerto
     public static function Find($id)
     {
         $db = new DbManager("config.txt");
-        $pdo = $db->Connect("Organizzazione_Concerto");
+        $pdo = $db->Connect("organizzazione_concerti");
 
         $stm = $pdo->prepare("SELECT * FROM Organizzazione_Concerti.concerti WHERE id = :id");
         $stm->bindParam(':id', $id, PDO::PARAM_INT);
@@ -117,9 +117,9 @@ class Concerto
     public static function FindAll()
     {
         $db = new DbManager("config.txt");
-        $pdo = $db->Connect("Organizzazione_Concerto");
+        $pdo = $db->Connect("organizzazione_concerti");
 
-        $stm = $pdo->query("SELECT * FROM Organizzazione_Concerto.concerti");
+        $stm = $pdo->query("SELECT * FROM organizzazione_concerti.concerti");
         return $stm->fetchAll();
     }
     public static function ShowAll($concerti)
@@ -145,9 +145,9 @@ class Concerto
         }
 
         $db = new DbManager("config.txt");
-        $pdo = $db->Connect("Organizzazione_Concerto");
+        $pdo = $db->Connect("organizzazione_concerti");
 
-        $stm = $pdo->prepare("DELETE FROM Organizzazione_Concerto.concerti WHERE id = :id");
+        $stm = $pdo->prepare("DELETE FROM organizzazione_concerti.concerti WHERE id = :id");
         $stm->bindParam(':id', $this->id, PDO::PARAM_INT);
 
         $stm->execute();
@@ -163,7 +163,7 @@ class Concerto
         }
 
         $db = new DbManager("config.txt");
-        $pdo = $db->Connect("Organizzazione_Concerto");
+        $pdo = $db->Connect("organizzazione_concerti");
 
         $updateFields = [];
         $bindParams = [];
@@ -179,7 +179,7 @@ class Concerto
         }
 
         $updateFieldsString = implode(', ', $updateFields);
-        $query = "UPDATE Organizzazione_Concerto.concerti SET $updateFieldsString WHERE id = :id";
+        $query = "UPDATE organizzazione_concerti.concerti SET $updateFieldsString WHERE id = :id";
 
         $stm = $pdo->prepare($query);
         $bindParams[':id'] = $this->id;
