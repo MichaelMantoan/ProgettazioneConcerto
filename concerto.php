@@ -73,6 +73,16 @@ class Concerto
     {
         $db = new DbManager("config.txt");
         $pdo = $db->Connect("organizzazione_concerti");
+
+        // Controllo se esiste già un concerto con lo stesso codice
+        $checkStm = $pdo->prepare("SELECT id FROM concerti WHERE codice = :codice");
+        $checkStm->bindParam(':codice', $concerto['codice']);
+        $checkStm->execute();
+
+        if ($checkStm->fetchColumn()) {
+            // Se esiste già, restituisci un errore
+            return ["error" => "Un concerto con questo codice esiste già."];
+        }
         $stm = $pdo->prepare("INSERT INTO concerti (codice, titolo, descrizione, data_concerto) VALUES (:codice, :titolo, :descrizione, :data_concerto)");
 
         $codice = $concerto['codice'];

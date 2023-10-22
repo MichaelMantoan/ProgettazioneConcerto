@@ -25,7 +25,11 @@ do {
             $data = readline();
             $concertoData = ['codice' => $codice, 'titolo' => $titolo, 'descrizione' => $descrizione, 'data_concerto' => $data];
             $createdConcerto = Concerto::Create($concertoData);
-            echo "Concerto creato con successo!" . PHP_EOL;
+            if (isset($createdConcerto["error"])) {
+                echo $createdConcerto["error"] . PHP_EOL;
+            } else {
+                echo "Concerto creato con successo!" . PHP_EOL;
+            }
             break;
 
         case 2:
