@@ -72,7 +72,7 @@ class Concerto
     public static function Create($concerto)
     {
         $db = new DbManager("config.txt");
-        $pdo = $db->Connect("organizzazione_concerti");
+        $pdo = $db->Connect("Organizzazione_Concerto");
         $stm = $pdo->prepare("INSERT INTO concerti (codice, titolo, descrizione, data_concerto) VALUES (:codice, :titolo, :descrizione, :data_concerto)");
 
         $codice = $concerto['codice'];
@@ -87,8 +87,8 @@ class Concerto
 
         $stm->execute();
 
-        $stm = $pdo->prepare("SELECT * FROM organizzazione_concerti.concerti ORDER BY ID DESC LIMIT 1");
-        $row = $stm->fetch(PDO::FETCH_OBJ);
+        $stm = $pdo->prepare("SELECT * FROM Organizzazione_Concerti.concerti ORDER BY ID DESC LIMIT 1");
+        $row = $stm->fetchobject();
 
         return $row;
     }
@@ -96,9 +96,9 @@ class Concerto
     public static function Find($id)
     {
         $db = new DbManager("config.txt");
-        $pdo = $db->Connect("organizzazione_concerti");
+        $pdo = $db->Connect("Organizzazione_Concerto");
 
-        $stm = $pdo->prepare("SELECT * FROM organizzazione_concerti.concerti WHERE id = :id");
+        $stm = $pdo->prepare("SELECT * FROM Organizzazione_Concerti.concerti WHERE id = :id");
         $stm->bindParam(':id', $id, PDO::PARAM_INT);
 
         $stm->execute();
@@ -109,7 +109,7 @@ class Concerto
             return null; // Nessun concerto trovato con l'ID specificato
         }
         $concerto = new Concerto($result->codice, $result->titolo, $result->descrizione, $result->data_concerto);
-        $concerto->id = $result->id; // Imposta l'ID dell'oggetto
+        $concerto->id = $result->id;  // Imposta l'ID dell'oggetto
         // Creiamo e restituiamo un nuovo oggetto Concerto basato sui dati recuperati.
         return $concerto;
     }
@@ -117,9 +117,9 @@ class Concerto
     public static function FindAll()
     {
         $db = new DbManager("config.txt");
-        $pdo = $db->Connect("organizzazione_concerti");
+        $pdo = $db->Connect("Organizzazione_Concerto");
 
-        $stm = $pdo->query("SELECT * FROM organizzazione_concerti.concerti");
+        $stm = $pdo->query("SELECT * FROM Organizzazione_Concerto.concerti");
         return $stm->fetchAll();
     }
     public static function ShowAll($concerti)
@@ -134,6 +134,7 @@ class Concerto
         }
     }
 
+
     //METODI DI ISTANZA
 
     public function Delete()
@@ -144,9 +145,9 @@ class Concerto
         }
 
         $db = new DbManager("config.txt");
-        $pdo = $db->Connect("organizzazione_concerti");
+        $pdo = $db->Connect("Organizzazione_Concerto");
 
-        $stm = $pdo->prepare("DELETE FROM organizzazione_concerti.concerti WHERE id = :id");
+        $stm = $pdo->prepare("DELETE FROM Organizzazione_Concerto.concerti WHERE id = :id");
         $stm->bindParam(':id', $this->id, PDO::PARAM_INT);
 
         $stm->execute();
@@ -162,7 +163,7 @@ class Concerto
         }
 
         $db = new DbManager("config.txt");
-        $pdo = $db->Connect("organizzazione_concerti");
+        $pdo = $db->Connect("Organizzazione_Concerto");
 
         $updateFields = [];
         $bindParams = [];
@@ -178,7 +179,7 @@ class Concerto
         }
 
         $updateFieldsString = implode(', ', $updateFields);
-        $query = "UPDATE organizzazione_concerti.concerti SET $updateFieldsString WHERE id = :id";
+        $query = "UPDATE Organizzazione_Concerto.concerti SET $updateFieldsString WHERE id = :id";
 
         $stm = $pdo->prepare($query);
         $bindParams[':id'] = $this->id;
@@ -190,6 +191,9 @@ class Concerto
         $stm->execute();
         return true;
     }
+
+
+
 
     public function Show()
     {
