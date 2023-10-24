@@ -6,12 +6,12 @@ require 'db_manager.php';
 class Concerto
 {
 
-    private $id;
-    private $codice;
-    private $titolo;
-    private $descrizione;
-    private $data;
-
+    public $id;
+    public $codice;
+    public $titolo;
+    public $descrizione;
+    public $data;
+    
     public function __construct($codice, $titolo, $descrizione, $data_concerto)
     {
         $this->codice = $codice;
@@ -19,50 +19,50 @@ class Concerto
         $this->descrizione = $descrizione;
         $this->data = $data_concerto;
     }
-
+    
     //METODI GET
 
-    public function __getID()
+    public function getID()
     {
         return $this->id;
     }
 
-    public function __getCodice()
+    public function getCodice()
     {
         return $this->codice;
     }
-    public function __getTitolo()
+    public function getTitolo()
     {
         return $this->titolo;
     }
-    public function __getDescrizione()
+    public function getDescrizione()
     {
         return $this->descrizione;
     }
-    public function __getData()
+    public function getData()
     {
         return $this->data;
     }
 
     //METODI SET
 
-    public function __setID($id)
+    private function setID($id)
     {
         $this->id = $id;
     }
-    public function __setCodice($codice)
+    public function setCodice($codice)
     {
         $this->codice = $codice;
     }
-    public function __setTitolo($titolo)
+    public function setTitolo($titolo)
     {
         $this->titolo = $titolo;
     }
-    public function __setDescrizione($descrizione)
+    public function setDescrizione($descrizione)
     {
         $this->descrizione = $descrizione;
     }
-    public function __setData($data)
+    public function setData($data)
     {
         $this->data = $data;
     }
@@ -71,9 +71,8 @@ class Concerto
 
     public static function Create($concerto)
     {
-        $db = new DbManager("config.txt");
-        $pdo = $db->Connect("organizzazione_concerti");
 
+        $pdo = Concerto::Connect();
         // Controllo se esiste già un concerto con lo stesso codice
         $checkStm = $pdo->prepare("SELECT id FROM concerti WHERE codice = :codice");
         $checkStm->bindParam(':codice', $concerto['codice']);
@@ -95,18 +94,23 @@ class Concerto
         $stm->bindParam(':descrizione', $descrizione);
         $stm->bindParam(':data_concerto', $data);
 
-        $stm->execute();
-
-        $stm = $pdo->prepare("SELECT * FROM Organizzazione_Concerti.concerti ORDER BY ID DESC LIMIT 1");
-        $row = $stm->fetchobject();
-
-        return $row;
+        $result = $stm->execute();
+        if ($result == false) {
+            return null;
+        } else {
+            $stm = $pdo->prepare("SELECT * FROM Organizzazione_Concerti.concerti ORDER BY ID DESC LIMIT 1");
+            $stm->execute();
+            $result = $stm->fetch(PDO::FETCH_OBJ);
+            $row = new Concerto($result->codice, $result->titolo, $result->descrizione, $result->data_concerto);
+            $row->id = $result->id;
+            return $row;
+        }
     }
 
     public static function Find($id)
     {
-        $db = new DbManager("config.txt");
-        $pdo = $db->Connect("organizzazione_concerti");
+
+        $pdo= Concerto::Connect();
 
         $stm = $pdo->prepare("SELECT * FROM Organizzazione_Concerti.concerti WHERE id = :id");
         $stm->bindParam(':id', $id, PDO::PARAM_INT);
@@ -118,16 +122,19 @@ class Concerto
         if (!$result) {
             return null; // Nessun concerto trovato con l'ID specificato
         }
+        
         $concerto = new Concerto($result->codice, $result->titolo, $result->descrizione, $result->data_concerto);
         $concerto->id = $result->id;  // Imposta l'ID dell'oggetto
         // Creiamo e restituiamo un nuovo oggetto Concerto basato sui dati recuperati.
+        
+        
         return $concerto;
     }
 
+
     public static function FindAll()
     {
-        $db = new DbManager("config.txt");
-        $pdo = $db->Connect("organizzazione_concerti");
+        $pdo= Concerto::Connect();
 
         $stm = $pdo->query("SELECT * FROM organizzazione_concerti.concerti");
         return $stm->fetchAll();
@@ -154,8 +161,7 @@ class Concerto
             return false;
         }
 
-        $db = new DbManager("config.txt");
-        $pdo = $db->Connect("organizzazione_concerti");
+        $pdo = Concerto::Connect();
 
         $stm = $pdo->prepare("DELETE FROM organizzazione_concerti.concerti WHERE id = :id");
         $stm->bindParam(':id', $this->id, PDO::PARAM_INT);
@@ -166,52 +172,74 @@ class Concerto
 
 
     public function Update($concerto)
-    {
-        if (!$this->id) {
-            // Non eseguire l'aggiornamento se l'ID non è impostato.
-            return false;
-        }
+{
+    // Verifica che l'oggetto Concerto abbia un ID valido
+    if (!$this->id) {
+        return false;
+    }
 
-        $db = new DbManager("config.txt");
-        $pdo = $db->Connect("organizzazione_concerti");
+    // Connetti al database
+    $pdo = Concerto::Connect();
 
-        $updateFields = [];
-        $bindParams = [];
+    // Verifica se esiste già un concerto con lo stesso codice (escluso se è lo stesso concerto)
+    $checkStm = $pdo->prepare("SELECT id FROM concerti WHERE codice = :codice AND id <> :current_id");
+    $checkStm->bindParam(':codice', $concerto['codice']);
+    $checkStm->bindParam(':current_id', $this->id, PDO::PARAM_INT);
+    $checkStm->execute();
 
-        foreach ($concerto as $key => $value) {
+    if ($checkStm->fetchColumn()) {
+        return ["error" => "Un concerto con questo codice esiste già."];
+    }
+
+    // Prepara i dati per l'aggiornamento
+    $updateFields = [];
+    $bindParams = [':id' => $this->id];
+
+    foreach ($concerto as $key => $value) {
+        if ($value !== null) {
             $updateFields[] = "$key = :$key";
             $bindParams[":$key"] = $value;
         }
-
-        if (empty($updateFields)) {
-            // Nessun campo da aggiornare specificato
-            return false;
-        }
-
-        $updateFieldsString = implode(', ', $updateFields);
-        $query = "UPDATE organizzazione_concerti.concerti SET $updateFieldsString WHERE id = :id";
-
-        $stm = $pdo->prepare($query);
-        $bindParams[':id'] = $this->id;
-
-        foreach ($bindParams as $param => $value) {
-            $stm->bindValue($param, $value);
-        }
-
-        $stm->execute();
-        return true;
     }
 
+    if (empty($updateFields)) {
+        return false; // Nessun campo da aggiornare specificato
+    }
 
+    // Costruisci la query SQL
+    $updateFieldsString = implode(', ', $updateFields);
+    $query = "UPDATE organizzazione_concerti.concerti SET $updateFieldsString WHERE id = :id";
+
+    // Esegui l'aggiornamento con il binding dei parametri
+    $stm = $pdo->prepare($query);
+
+    foreach ($bindParams as $param => $value) {
+        $stm->bindValue($param, $value);
+    }
+
+    $result = $stm->execute();
+
+    return $result;
+}
 
 
     public function Show()
     {
-        return "Concerto:
+        echo("Concerto:
         ID: {$this->id}
         Codice: {$this->codice}
         Titolo: {$this->titolo}
         Descrizione: {$this->descrizione}
-        Data: {$this->data}";
+        Data: {$this->data}"."\n");
+    }
+
+
+
+    //METODO CONNESSIONE
+
+    private static function Connect()
+    {
+        $db = new DbManager("config.txt");
+        return $db->Connect("organizzazione_concerti");
     }
 }

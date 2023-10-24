@@ -25,10 +25,13 @@ do {
             $data = readline();
             $concertoData = ['codice' => $codice, 'titolo' => $titolo, 'descrizione' => $descrizione, 'data_concerto' => $data];
             $createdConcerto = Concerto::Create($concertoData);
-            if (isset($createdConcerto["error"])) {
-                echo $createdConcerto["error"] . PHP_EOL;
-            } else {
+            if(isset($createdConcerto))
+            {
                 echo "Concerto creato con successo!" . PHP_EOL;
+            }
+            else
+            {
+                echo "Errore: Concerto non creato". PHP_EOL;
             }
             break;
 
@@ -37,7 +40,7 @@ do {
             $id = readline();
             $concerto = Concerto::Find($id);
             if ($concerto) {
-                echo $concerto->Show() . PHP_EOL;
+                $concerto->Show() . PHP_EOL;
             } else {
                 echo "Concerto non trovato!" . PHP_EOL;
             }
