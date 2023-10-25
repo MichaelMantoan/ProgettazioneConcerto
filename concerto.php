@@ -78,7 +78,8 @@ class Concerto
         $checkStm->bindParam(':codice', $concerto['codice']);
         $checkStm->execute();
 
-        if ($checkStm->fetchColumn()) {
+        if ($checkStm->fetchColumn()) 
+        {
             // Se esiste già, restituisci un errore
             return ["error" => "Un concerto con questo codice esiste già."];
         }
@@ -95,9 +96,12 @@ class Concerto
         $stm->bindParam(':data_concerto', $data);
 
         $result = $stm->execute();
-        if ($result == false) {
+        if ($result == false) 
+        {
             return null;
-        } else {
+        } 
+        else 
+        {
             $stm = $pdo->prepare("SELECT * FROM Organizzazione_Concerti.concerti ORDER BY ID DESC LIMIT 1");
             $stm->execute();
             $result = $stm->fetch(PDO::FETCH_OBJ);
@@ -119,7 +123,8 @@ class Concerto
 
         $result = $stm->fetch(PDO::FETCH_OBJ);
 
-        if (!$result) {
+        if (!$result) 
+        {
             return null; // Nessun concerto trovato con l'ID specificato
         }
         
@@ -135,13 +140,13 @@ class Concerto
     public static function FindAll()
     {
         $pdo= Concerto::Connect();
-
         $stm = $pdo->query("SELECT * FROM organizzazione_concerti.concerti");
         return $stm->fetchAll();
     }
     public static function ShowAll($concerti)
     {
-        foreach ($concerti as $concerto) {
+        foreach ($concerti as $concerto) 
+        {
             echo "ID: " . $concerto['id'] . PHP_EOL;
             echo "Codice: " . $concerto['codice'] . PHP_EOL;
             echo "Titolo: " . $concerto['titolo'] . PHP_EOL;
@@ -156,7 +161,8 @@ class Concerto
 
     public function Delete()
     {
-        if (!$this->id) {
+        if (!$this->id) 
+        {
             // Non eseguire la query DELETE se l'ID non è impostato.
             return false;
         }
@@ -172,55 +178,61 @@ class Concerto
 
 
     public function Update($concerto)
-{
-    // Verifica che l'oggetto Concerto abbia un ID valido
-    if (!$this->id) {
-        return false;
-    }
-
-    // Connetti al database
-    $pdo = Concerto::Connect();
-
-    // Verifica se esiste già un concerto con lo stesso codice (escluso se è lo stesso concerto)
-    $checkStm = $pdo->prepare("SELECT id FROM concerti WHERE codice = :codice AND id <> :current_id");
-    $checkStm->bindParam(':codice', $concerto['codice']);
-    $checkStm->bindParam(':current_id', $this->id, PDO::PARAM_INT);
-    $checkStm->execute();
-
-    if ($checkStm->fetchColumn()) {
-        return ["error" => "Un concerto con questo codice esiste già."];
-    }
-
-    // Prepara i dati per l'aggiornamento
-    $updateFields = [];
-    $bindParams = [':id' => $this->id];
-
-    foreach ($concerto as $key => $value) {
-        if ($value !== null) {
-            $updateFields[] = "$key = :$key";
-            $bindParams[":$key"] = $value;
+    {
+        // Verifica che l'oggetto Concerto abbia un ID valido
+        if (!$this->id) 
+        {
+            return false;
         }
+
+        // Connetti al database
+        $pdo = Concerto::Connect();
+
+        // Verifica se esiste già un concerto con lo stesso codice (escluso se è lo stesso concerto)
+        $checkStm = $pdo->prepare("SELECT id FROM concerti WHERE codice = :codice AND id <> :current_id");
+        $checkStm->bindParam(':codice', $concerto['codice']);
+        $checkStm->bindParam(':current_id', $this->id, PDO::PARAM_INT);
+        $checkStm->execute();
+
+        if ($checkStm->fetchColumn()) 
+        {
+            return ["error" => "Un concerto con questo codice esiste già."];
+        }
+
+        // Prepara i dati per l'aggiornamento
+        $updateFields = [];
+        $bindParams = [':id' => $this->id];
+
+        foreach ($concerto as $key => $value) 
+        {
+            if ($value !== null) 
+            {
+                $updateFields[] = "$key = :$key";
+                $bindParams[":$key"] = $value;
+            }
+        }
+
+        if (empty($updateFields)) 
+        {
+            return false; // Nessun campo da aggiornare specificato
+        }
+
+        // Costruisci la query SQL
+        $updateFieldsString = implode(', ', $updateFields);
+        $query = "UPDATE organizzazione_concerti.concerti SET $updateFieldsString WHERE id = :id";
+
+        // Esegui l'aggiornamento con il binding dei parametri
+        $stm = $pdo->prepare($query);
+
+        foreach ($bindParams as $param => $value)
+        {
+            $stm->bindValue($param, $value);
+        }
+
+        $result = $stm->execute();
+
+        return $result;
     }
-
-    if (empty($updateFields)) {
-        return false; // Nessun campo da aggiornare specificato
-    }
-
-    // Costruisci la query SQL
-    $updateFieldsString = implode(', ', $updateFields);
-    $query = "UPDATE organizzazione_concerti.concerti SET $updateFieldsString WHERE id = :id";
-
-    // Esegui l'aggiornamento con il binding dei parametri
-    $stm = $pdo->prepare($query);
-
-    foreach ($bindParams as $param => $value) {
-        $stm->bindValue($param, $value);
-    }
-
-    $result = $stm->execute();
-
-    return $result;
-}
 
 
     public function Show()
