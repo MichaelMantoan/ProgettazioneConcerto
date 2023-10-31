@@ -6,11 +6,11 @@ require 'db_manager.php';
 class Concerto
 {
 
-    public $id;
-    public $codice;
-    public $titolo;
-    public $descrizione;
-    public $data;
+    private $id;
+    private $codice;
+    private $titolo;
+    private $descrizione;
+    private $data;
     
     public function __construct($codice, $titolo, $descrizione, $data_concerto)
     {
