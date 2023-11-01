@@ -3,7 +3,10 @@
 class DbManager
 {
 
-    private $host, $porta, $username, $password;
+    private $host; 
+    private $porta;
+    private $username; 
+    private $password;
 
     public function __construct($fileDBConfig)
     {

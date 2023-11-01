@@ -1,6 +1,7 @@
 <?php
 
-require 'db_manager.php';
+require 'sala.php';
+
 
 
 class Concerto
@@ -11,13 +12,15 @@ class Concerto
     private $titolo;
     private $descrizione;
     private $data;
+    private $sala_id;
     
-    public function __construct($codice, $titolo, $descrizione, $data_concerto)
+    public function __construct($codice, $titolo, $descrizione, $data_concerto, $sala_id)
     {
         $this->codice = $codice;
         $this->titolo = $titolo;
         $this->descrizione = $descrizione;
         $this->data = $data_concerto;
+        $this->sala_id = $sala_id;
     }
     
     //METODI GET
@@ -83,17 +86,19 @@ class Concerto
             // Se esiste già, restituisci un errore
             return ["error" => "Un concerto con questo codice esiste già."];
         }
-        $stm = $pdo->prepare("INSERT INTO concerti (codice, titolo, descrizione, data_concerto) VALUES (:codice, :titolo, :descrizione, :data_concerto)");
+        $stm = $pdo->prepare("INSERT INTO concerti (codice, titolo, descrizione, data_concerto, sala_id) VALUES (:codice, :titolo, :descrizione, :data_concerto, :sala_id)");
 
         $codice = $concerto['codice'];
         $titolo = $concerto['titolo'];
         $descrizione = $concerto['descrizione'];
         $data = $concerto['data_concerto'];
+        $sala_id = $concerto['sala_id'];
 
         $stm->bindParam(':codice', $codice);
         $stm->bindParam(':titolo', $titolo);
         $stm->bindParam(':descrizione', $descrizione);
         $stm->bindParam(':data_concerto', $data);
+        $stm->bindParam(':sala_id', $sala_id);
 
         $result = $stm->execute();
         if ($result == false) 
@@ -105,7 +110,7 @@ class Concerto
             $stm = $pdo->prepare("SELECT * FROM Organizzazione_Concerti.concerti ORDER BY ID DESC LIMIT 1");
             $stm->execute();
             $result = $stm->fetch(PDO::FETCH_OBJ);
-            $row = new Concerto($result->codice, $result->titolo, $result->descrizione, $result->data_concerto);
+            $row = new Concerto($result->codice, $result->titolo, $result->descrizione, $result->data_concerto,$result->sala_id);
             $row->id = $result->id;
             return $row;
         }
@@ -128,7 +133,7 @@ class Concerto
             return null; // Nessun concerto trovato con l'ID specificato
         }
         
-        $concerto = new Concerto($result->codice, $result->titolo, $result->descrizione, $result->data_concerto);
+        $concerto = new Concerto($result->codice, $result->titolo, $result->descrizione, $result->data_concerto,$result->sala_id);
         $concerto->id = $result->id;  // Imposta l'ID dell'oggetto
         // Creiamo e restituiamo un nuovo oggetto Concerto basato sui dati recuperati.
         
@@ -152,6 +157,7 @@ class Concerto
             echo "Titolo: " . $concerto['titolo'] . PHP_EOL;
             echo "Descrizione: " . $concerto['descrizione'] . PHP_EOL;
             echo "Data: " . $concerto['data_concerto'] . PHP_EOL;
+            echo "SalaID: " . $concerto['sala_id'] . PHP_EOL;
             echo "------------------------------------" . PHP_EOL;
         }
     }
@@ -242,10 +248,19 @@ class Concerto
         Codice: {$this->codice}
         Titolo: {$this->titolo}
         Descrizione: {$this->descrizione}
-        Data: {$this->data}"."\n");
+        Data: {$this->data}
+        SalaID: {$this->sala_id}"."\n");
     }
 
+    public function Sala()
+    {
+        $pdo = Concerto::Connect();
+        $Stm = $pdo->prepare("SELECT * FROM organizzazione_concerti.sale WHERE id = :sala_id");
+        $Stm->bindParam(':sala_id', $this->sala_id,PDO::PARAM_INT);
+        $Stm->execute();
+        return $Stm->fetchObject('Sala');
 
+    }
 
     //METODO CONNESSIONE
 

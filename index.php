@@ -33,6 +33,9 @@ do {
         case 5:
             FindAll();
             break;
+        case 6:
+            ShowSala();
+            break;
         case 0:
             echo "Terminazione del programma..." . PHP_EOL;
             break;
@@ -55,7 +58,9 @@ function Create()
     $descrizione = readline();
     echo "Inserisci la data del concerto (formato: YYYY-MM-DD): ";
     $data = readline();
-    $concertoData = ['codice' => $codice, 'titolo' => $titolo, 'descrizione' => $descrizione, 'data_concerto' => $data];
+    echo "Inserisci l'Id della sala del concerto ";
+    $salaId = readline();
+    $concertoData = ['codice' => $codice, 'titolo' => $titolo, 'descrizione' => $descrizione, 'data_concerto' => $data, 'sala_id' => $salaId];
     $createdConcerto = Concerto::Create($concertoData);
     if (isset($createdConcerto)) {
         echo "Concerto creato con successo!" . PHP_EOL;
@@ -120,6 +125,23 @@ function Delete()
         echo "Concerto non trovato!" . PHP_EOL;
     }
 }
+
+function ShowSala()
+{
+    echo "Inserire l'id del concerto di cui vuoi visualizzare la sala\n";
+    $id = readline();
+    $concerto = Concerto::Find($id);
+    if($concerto)
+    {
+        $sala = $concerto->Sala();
+        $sala->show();
+    }
+    else
+    {
+        echo "Concerto non trovato!\n";
+    }
+}
+
 function FindAll()
 {
     $concerti = Concerto::FindAll();
