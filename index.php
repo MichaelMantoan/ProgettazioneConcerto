@@ -9,6 +9,7 @@ do {
     echo "Premere 3 per modificare un record" . PHP_EOL;
     echo "Premere 4 per eliminare un record" . PHP_EOL;
     echo "Premere 5 per mostrare tutti i record presenti nella tabella" . PHP_EOL;
+    echo "Premere 6 per mostrare la sala dove si tiene il concerto" . PHP_EOL;
     echo "Premere 0 per terminare il programma" . PHP_EOL;
 
     $scelta = readline();
