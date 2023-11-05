@@ -10,6 +10,7 @@ do {
     echo "Premere 4 per eliminare un record" . PHP_EOL;
     echo "Premere 5 per mostrare tutti i record presenti nella tabella" . PHP_EOL;
     echo "Premere 6 per mostrare la sala dove si tiene il concerto" . PHP_EOL;
+    echo "Premere 7 per mostrare i pezzi associati al concerto" . PHP_EOL;
     echo "Premere 0 per terminare il programma" . PHP_EOL;
 
     $scelta = readline();
@@ -36,6 +37,9 @@ do {
             break;
         case 6:
             ShowSala();
+            break;
+        case 7:
+            ShowPezzi();
             break;
         case 0:
             echo "Terminazione del programma..." . PHP_EOL;
@@ -136,6 +140,21 @@ function ShowSala()
     {
         $sala = $concerto->Sala();
         $sala->show();
+    }
+    else
+    {
+        echo "Concerto non trovato!\n";
+    }
+}
+function ShowPezzi()
+{
+    echo "Inserire l'id del concerto di cui vuoi visualizzare i pezzi\n";
+    $id = readline();
+    $concerto = Concerto::Find($id);
+    if($concerto)
+    {
+        $pezzi = $concerto->Pezzi();
+        Pezzo::show($pezzi);
     }
     else
     {

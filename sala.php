@@ -1,7 +1,5 @@
 <?php
 
-require "db_manager.php";
-
 class Sala
 {
     private $id;
@@ -43,13 +41,21 @@ class Sala
         return $this->capienza;
     }
 
+
+    public  static  function find($sala_id)
+    {
+        $db = new DbManager("config.txt");
+        $pdo = $db->Connect("organizzazione_concerti");
+        $Stm = $pdo->prepare("SELECT * FROM organizzazione_concerti.sale WHERE id = :sala_id");
+        $Stm->bindParam(':sala_id', $sala_id, PDO::PARAM_INT);
+        $Stm->execute();
+        return $Stm->fetchObject('Sala');
+    }
     public function show()
     {
         echo "ID: {$this->id}
         Codice: {$this->codice}
         Nome: {$this->nome}
         Capienza: {$this->capienza}\n";
-    }   
-    
+    }
 }
-

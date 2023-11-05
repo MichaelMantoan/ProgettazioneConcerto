@@ -1,6 +1,8 @@
 <?php
 
+require "db_manager.php";
 require 'sala.php';
+require 'pezzo.php';
 
 
 
@@ -45,6 +47,10 @@ class Concerto
     public function getData()
     {
         return $this->data;
+    }
+    public function getSalaId()
+    {
+        return $this->sala_id;
     }
 
     //METODI SET
@@ -254,12 +260,13 @@ class Concerto
 
     public function Sala()
     {
-        $pdo = Concerto::Connect();
-        $Stm = $pdo->prepare("SELECT * FROM organizzazione_concerti.sale WHERE id = :sala_id");
-        $Stm->bindParam(':sala_id', $this->sala_id,PDO::PARAM_INT);
-        $Stm->execute();
-        return $Stm->fetchObject('Sala');
+        return Sala::find(self::getSalaId());
 
+    }
+
+    public function Pezzi()
+    {
+        return Pezzo::find(self::getID());
     }
 
     //METODO CONNESSIONE
@@ -269,4 +276,5 @@ class Concerto
         $db = new DbManager("config.txt");
         return $db->Connect("organizzazione_concerti");
     }
+
 }
